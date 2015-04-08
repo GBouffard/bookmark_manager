@@ -1,4 +1,8 @@
 require 'database_cleaner'
+require 'capybara/rspec'
+require 'server'
+
+Capybara.app = BookmarkManager
 # Remember environment variables from week 1?
 ENV['RACK_ENV'] = 'test' # because we need to know what database to work with
 

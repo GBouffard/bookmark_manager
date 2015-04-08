@@ -1,4 +1,5 @@
 require 'data_mapper'
+require 'sinatra/base'
 
 # we are checking what environment we're in, and defaulting to development.
 env = ENV['RACK_ENV'] || 'development'
@@ -15,3 +16,9 @@ DataMapper.finalize
 
 # However, the database tables don't exist yet. Let's tell datamapper to create them
 DataMapper.auto_upgrade!
+
+class BookmarkManager < Sinatra::Base
+  get '/' do
+    "Makers Academy"
+  end
+end
