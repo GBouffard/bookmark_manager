@@ -1,6 +1,7 @@
 require 'data_mapper'
 require 'sinatra/base'
 require 'tag'
+require 'user'
 
 # we are checking what environment we're in, and defaulting to development.
 env = ENV['RACK_ENV'] || 'development'
@@ -19,6 +20,9 @@ DataMapper.finalize
 DataMapper.auto_upgrade!
 
 class BookmarkManager < Sinatra::Base
+  enable :sessions
+  set :session_secret, 'super secret'
+  
   get '/' do
     @links = Link.all
     erb :index
@@ -32,13 +36,34 @@ class BookmarkManager < Sinatra::Base
   # it if it doesn't exist already
       Tag.first_or_create(text: tag)
     end
-  Link.create(url: url, title: title, tags: tags)
-  redirect to('/')
+    Link.create(url: url, title: title, tags: tags)
+    redirect to('/')
   end
 
   get '/tags/:text' do
-  tag = Tag.first(text: params[:text])
-  @links = tag ? tag.links : []
-  erb :index
+    tag = Tag.first(text: params[:text])
+    @links = tag ? tag.links : []
+    erb :index
+  end
+
+  get '/users/new' do
+    # note the view is in views/users/new.erb
+    # we need the quotes because otherwise
+    # ruby would divide the symbol :users by the
+    # variable new (which makes no sense)
+    erb :'users/new'
+  end
+
+  post '/users' do
+    user = User.create(email: params[:email],
+                     password: params[:password])
+    session[:user_id] = user.id
+    redirect to('/')
+  end
+
+  helpers do
+    def current_user
+      @current_user ||= User.get(session[:user_id]) if session[:user_id]
+    end
   end
 end
